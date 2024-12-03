@@ -1,87 +1,203 @@
 ---
-import Card from "../components/Card.astro";
+import Card from "../components/Card.astro"; // Importa el componente "Card" para mostrar cada personaje.
 
 interface Personaje {
-  id: number;
-  name: string;
-  status: string;
-  species: string;
-  location: { name: string };
+  id: number; // Identificador único del personaje.
+  name: string; // Nombre del personaje.
+  status: string; // Estado (vivo, muerto, desconocido).
+  species: string; // Especie del personaje (humano, alien, etc.).
+  location: { name: string }; // Ubicación actual del personaje.
 }
 
+// Función para obtener un número aleatorio entre 1 y 42, correspondiente a una página de la API.
 const obtenerPaginaAleatoria = () => Math.floor(Math.random() * 42) + 1;
 
+// Función asíncrona para cargar personajes desde la API.
 const cargarPersonajes = async (): Promise<Personaje[]> => {
-  const pagina = obtenerPaginaAleatoria();
+  const pagina = obtenerPaginaAleatoria(); // Obtiene una página aleatoria.
   const respuesta = await fetch(
-    `https://rickandmortyapi.com/api/character?page=${pagina}`
+    `https://rickandmortyapi.com/api/character?page=${pagina}` // Llama a la API con la página generada.
   );
-  const datos = await respuesta.json();
-  return datos.results as Personaje[];
+  const datos = await respuesta.json(); // Convierte la respuesta a JSON.
+  return datos.results as Personaje[]; // Devuelve un array de personajes.
 };
 
+// Carga inicial de personajes al renderizar la página.
 const personajes: Personaje[] = await cargarPersonajes();
 ---
 
+<!-- Contenedor principal de la página -->
 <main class="contenedor">
   <h1>Personajes de Rick y Morty</h1>
+  <!-- Título principal -->
+
+  <!-- Botón para cargar nuevos personajes -->
   <button id="cargarMas" class="boton-cargar">Cargar Nuevos Personajes</button>
+
+  <!-- Grid que contiene la lista de personajes -->
   <ul id="personajesGrid" class="grid">
     {
-      personajes.map((personaje) => (
-        <Card
-          href={`/personaje/${personaje.id}`}
-          title={personaje.name}
-          body={`${personaje.species} - ${personaje.status}
+      personajes.map(
+        (
+          personaje // Mapea cada personaje al componente "Card".
+        ) => (
+          <Card
+            href={`/personaje/${personaje.id}`}
+            title={personaje.name}
+            body={`${personaje.species} - ${personaje.status}
 Ubicación: ${personaje.location.name}`}
-        />
-      ))
+          />
+        )
+      )
     }
   </ul>
 </main>
 
+<!-- Estilos de la página -->
 <style>
+  /* Variables para personalizar colores y estilos */
+  :root {
+    --primary-color: #1abc9c; /* Color principal */
+    --secondary-color: #16a085; /* Color secundario */
+    --accent-color: #e74c3c; /* Color de acento */
+    --text-color: #ecf0f1; /* Color del texto */
+    --background-color: #2c3e50; /* Fondo general */
+    --card-background: #34495e; /* Fondo de las tarjetas */
+  }
+
+  /* Estilo base del body */
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: "Arial", sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Contenedor principal */
   .contenedor {
     margin: auto;
-    padding: 1.5rem;
+    padding: 2rem;
     max-width: 1200px;
+    text-align: center;
   }
 
+  /* Título principal */
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--accent-color);
+  }
+
+  /* Botón de cargar más personajes */
   .boton-cargar {
-    margin: 2rem auto;
+    display: inline-block;
     padding: 1rem 2rem;
-    background-color: #2c3e50;
-    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    background: var(--primary-color);
+    color: var(--text-color);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Sombra suave */
+    transition:
+      background 0.3s ease,
+      transform 0.2s ease; /* Animaciones */
   }
 
+  /* Efecto hover en el botón */
+  .boton-cargar:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px); /* Levanta el botón visualmente */
+  }
+
+  /* Grid que organiza las tarjetas */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    ); /* Distribución responsiva */
     gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  /* Elimina el estilo de lista por defecto */
+  li {
+    list-style: none;
+  }
+
+  /* Estilo de las tarjetas */
+  .card {
+    background: var(--card-background);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4); /* Sombra de las tarjetas */
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease; /* Animaciones */
+  }
+
+  /* Efecto hover en las tarjetas */
+  .card:hover {
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5); /* Sombra más intensa */
+  }
+
+  /* Estilo de enlaces dentro de las tarjetas */
+  .card a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Título en las tarjetas */
+  .card h2 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    text-align: center;
+  }
+
+  /* Texto descriptivo en las tarjetas */
+  .card p {
+    margin: 0.5rem 1rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  /* Imágenes de las tarjetas */
+  .card img {
+    width: 100%; /* Ancho completo */
+    height: auto; /* Escalado proporcional */
+    display: block;
+    border-bottom: 2px solid var(--accent-color); /* Línea decorativa */
   }
 </style>
 
+<!-- JavaScript para interactividad -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const boton = document.getElementById("cargarMas");
-    const grid = document.getElementById("personajesGrid");
+    // Espera a que la página cargue.
+    const boton = document.getElementById("cargarMas"); // Botón de "Cargar Nuevos Personajes".
+    const grid = document.getElementById("personajesGrid"); // Contenedor de las tarjetas.
 
     if (!boton || !grid) {
-      console.error("Error: Elementos del DOM no encontrados.");
+      console.error("Error: Elementos del DOM no encontrados."); // Verifica que los elementos existan.
       return;
     }
 
     boton.addEventListener("click", async () => {
+      // Evento click en el botón.
       try {
-        const pagina = Math.floor(Math.random() * 42) + 1;
+        const pagina = Math.floor(Math.random() * 42) + 1; // Obtiene una página aleatoria.
         const respuesta = await fetch(
-          `https://rickandmortyapi.com/api/character?page=${pagina}`
+          `https://rickandmortyapi.com/api/character?page=${pagina}` // Llama a la API.
         );
-        const datos = await respuesta.json();
+        const datos = await respuesta.json(); // Convierte la respuesta a JSON.
 
+        // Renderiza nuevas tarjetas con los datos obtenidos.
         grid.innerHTML = datos.results
           .map(
             (personaje: {
@@ -91,7 +207,7 @@ Ubicación: ${personaje.location.name}`}
               status: any;
               location: { name: any };
             }) => `
-            <li>
+            <li class="card">
               <a href="/personaje/${personaje.id}">
                 <h2>${personaje.name}</h2>
                 <p>${personaje.species} - ${personaje.status} - Ubicación: ${personaje.location.name}</p>
@@ -101,7 +217,7 @@ Ubicación: ${personaje.location.name}`}
           )
           .join("");
       } catch (error) {
-        console.error("Error al cargar personajes:", error);
+        console.error("Error al cargar personajes:", error); // Maneja errores.
       }
     });
   });
