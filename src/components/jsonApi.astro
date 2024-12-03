@@ -1,0 +1,108 @@
+---
+import Card from "../components/Card.astro";
+
+interface Personaje {
+  id: number;
+  name: string;
+  status: string;
+  species: string;
+  location: { name: string };
+}
+
+const obtenerPaginaAleatoria = () => Math.floor(Math.random() * 42) + 1;
+
+const cargarPersonajes = async (): Promise<Personaje[]> => {
+  const pagina = obtenerPaginaAleatoria();
+  const respuesta = await fetch(
+    `https://rickandmortyapi.com/api/character?page=${pagina}`
+  );
+  const datos = await respuesta.json();
+  return datos.results as Personaje[];
+};
+
+const personajes: Personaje[] = await cargarPersonajes();
+---
+
+<main class="contenedor">
+  <h1>Personajes de Rick y Morty</h1>
+  <button id="cargarMas" class="boton-cargar">Cargar Nuevos Personajes</button>
+  <ul id="personajesGrid" class="grid">
+    {
+      personajes.map((personaje) => (
+        <Card
+          href={`/personaje/${personaje.id}`}
+          title={personaje.name}
+          body={`${personaje.species} - ${personaje.status}
+Ubicación: ${personaje.location.name}`}
+        />
+      ))
+    }
+  </ul>
+</main>
+
+<style>
+  .contenedor {
+    margin: auto;
+    padding: 1.5rem;
+    max-width: 1200px;
+  }
+
+  .boton-cargar {
+    margin: 2rem auto;
+    padding: 1rem 2rem;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const boton = document.getElementById("cargarMas");
+    const grid = document.getElementById("personajesGrid");
+
+    if (!boton || !grid) {
+      console.error("Error: Elementos del DOM no encontrados.");
+      return;
+    }
+
+    boton.addEventListener("click", async () => {
+      try {
+        const pagina = Math.floor(Math.random() * 42) + 1;
+        const respuesta = await fetch(
+          `https://rickandmortyapi.com/api/character?page=${pagina}`
+        );
+        const datos = await respuesta.json();
+
+        grid.innerHTML = datos.results
+          .map(
+            (personaje: {
+              id: any;
+              name: any;
+              species: any;
+              status: any;
+              location: { name: any };
+            }) => `
+            <li>
+              <a href="/personaje/${personaje.id}">
+                <h2>${personaje.name}</h2>
+                <p>${personaje.species} - ${personaje.status} - Ubicación: ${personaje.location.name}</p>
+              </a>
+            </li>
+          `
+          )
+          .join("");
+      } catch (error) {
+        console.error("Error al cargar personajes:", error);
+      }
+    });
+  });
+</script>
